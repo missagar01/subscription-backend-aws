@@ -1,0 +1,79 @@
+import {
+  getAllUsersService,
+  createUserService,
+  updateUserService,
+  deleteUserService
+} from "../services/userServices.js";
+
+import pool from "../config/db.js";
+
+// GET all users
+export async function getAllUsers(req, res) {
+  try {
+    const users = await getAllUsersService();
+    res.json(users);
+  } catch (err) {
+    console.error("User fetch error:", err);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+}
+
+// CREATE user
+export async function createUser(req, res) {
+  try {
+    const { username, name, email, password, role } = req.body;
+
+    // Check duplicate
+    const exists = await pool.query(
+      "SELECT * FROM users WHERE username=$1",
+      [username]
+    );
+    if (exists.rows.length > 0) {
+      return res.status(400).json({ error: "Username already exists" });
+    }
+
+    const user = await createUserService({
+      username,
+      name,
+      email,
+      password,
+      role
+    });
+
+    res.json({ success: true, user });
+  } catch (err) {
+    console.error("User create error:", err);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+}
+
+// UPDATE user
+export async function updateUser(req, res) {
+  try {
+    const username = req.params.username;
+
+    const updated = await updateUserService({
+      username,
+      ...req.body
+    });
+
+    res.json({ success: true, user: updated });
+  } catch (err) {
+    console.error("User update error:", err);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+}
+
+// DELETE user
+export async function deleteUser(req, res) {
+  try {
+    const username = req.params.username;
+
+    await deleteUserService(username);
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error("User delete error:", err);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+}

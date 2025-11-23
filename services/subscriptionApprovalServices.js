@@ -1,0 +1,88 @@
+import pool from "../config/db.js";
+
+// --------------------------------------------------
+// FETCH Pending Approvals
+// --------------------------------------------------
+export const getPendingApprovals = async () => {
+  const query = `
+    SELECT *
+    FROM subscription
+    WHERE actual_2 IS NULL
+      AND planned_2 IS NOT NULL
+    ORDER BY id DESC;
+  `;
+  const res = await pool.query(query);
+  return res.rows;
+};
+
+// --------------------------------------------------
+// FETCH Approval History
+// --------------------------------------------------
+export const getApprovalHistory = async () => {
+  const query = `
+    SELECT *
+    FROM approval_history
+    ORDER BY id DESC;
+  `;
+  const res = await pool.query(query);
+  return res.rows;
+};
+
+// --------------------------------------------------
+// UPDATE Subscription Approval Status
+// --------------------------------------------------
+export const updateApprovalStatus = async ({
+  subscriptionNo,
+  approval,
+}) => {
+  const query = `
+    UPDATE subscription
+    SET actual_2 = NOW(),
+        approval_status = $1,
+        actual_3 = NULL,
+        updated_at = NOW()
+    WHERE subscription_no = $2
+    RETURNING *;
+  `;
+  const values = [approval, subscriptionNo];
+  const res = await pool.query(query, values);
+  return res.rows[0];
+};
+
+// --------------------------------------------------
+// INSERT Into APPROVAL HISTORY
+// --------------------------------------------------
+export const insertApprovalHistory = async ({
+  subscriptionNo,
+  approval,
+  note,
+  approvedBy,
+  requestedOn,
+}) => {
+
+  const countRes = await pool.query(`
+    SELECT COUNT(*) FROM approval_history
+  `);
+  const next = Number(countRes.rows[0].count) + 1;
+  const approvalNo = `APG-${String(next).padStart(4, "0")}`;
+
+  const query = `
+    INSERT INTO approval_history (
+      approval_no, subscription_no, approval_status, note,
+      approved_by, requested_on
+    )
+    VALUES ($1,$2,$3,$4,$5,$6)
+    RETURNING *;
+  `;
+  const values = [
+    approvalNo,
+    subscriptionNo,
+    approval,
+    note,
+    approvedBy,
+    requestedOn
+  ];
+
+  const res = await pool.query(query, values);
+  return res.rows[0];
+};
