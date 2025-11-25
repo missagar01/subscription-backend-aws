@@ -17,4 +17,9 @@ router.get("/mine", authMiddleware, getMySubscriptions);
 // DASHBOARD DATA
 router.get("/dashboard", authMiddleware, getDashboardStats);
 
+router.get("/dashboards", getDashboardStats);
+router.get("/dashboard-all", getAllSubscriptions);
+
+
+
 export default router;

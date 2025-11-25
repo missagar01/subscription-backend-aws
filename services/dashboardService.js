@@ -38,3 +38,14 @@ export async function getDashboardStatsService(username, role) {
   const result = await pool.query(query);
   return toCamel(result.rows);
 }
+
+
+export async function getDashboardNamesService() {
+  const result = await pool.query(
+    `SELECT DISTINCT subscriber_name AS subscriber_name
+     FROM subscription
+     WHERE subscriber_name IS NOT NULL AND subscriber_name <> ''
+     ORDER BY subscriber_name ASC`
+  );
+  return toCamel(result.rows);
+}

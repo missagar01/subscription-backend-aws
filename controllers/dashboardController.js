@@ -37,3 +37,14 @@ export async function getDashboardStats(req, res) {
     res.status(500).json({ error: "Internal error" });
   }
 }
+
+
+export async function getDashboardNames(req, res) {
+  try {
+    const data = await getDashboardNamesService();
+    res.json(data);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ error: "Internal error" });
+  }
+}
