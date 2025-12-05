@@ -23,8 +23,8 @@ app.use(express.json());
 
 // Routes
 
-app.use("/master", masterRoutes);
-app.use("/users1", userRoutes1);
+app.use("/api/master", masterRoutes);
+app.use("/api/users1", userRoutes1);
 app.use("/api/subscription", subscriptionRoutes);
 app.use("/api/subscription-approval", subscriptionApprovalRoutes);
 app.use("/api/subscription-payment", subscriptionPaymentRoutes);
